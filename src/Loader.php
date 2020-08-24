@@ -4,7 +4,7 @@ namespace Ineersa\TDS;
 
 class Loader
 {
-    private $url = 'test';
+    private $url = '';
 
     private $hash;
 
@@ -14,19 +14,26 @@ class Loader
 
     private $advDebug = false; // Note that enabling advanced debug will include debugging information in the response possibly breaking up your code
 
-    private $log = false;
-
     public $responseCode;
 
     private const METHOD_POST = 'POST';
 
     private const METHOD_GET = 'GET';
 
-    public function __construct($hash)
+    /**
+     * Loader constructor.
+     * @param string $hash
+     * @param string $url
+     */
+    public function __construct($hash, $url)
     {
         $this->hash = $hash;
+        $this->url = $url;
     }
 
+    /**
+     * @return string
+     */
     public function getContent()
     {
         $data = [
@@ -35,10 +42,23 @@ class Loader
             'user_agent' => $_SERVER["HTTP_USER_AGENT"] ?? '',
             'user_locale' => $this->resolveLocale(),
             'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-            'utm_term' => $_REQUEST['utm_term'],
+            'utm_term' => $_REQUEST['utm_term'] ?? '',
         ];
 
-        return $data;
+        $result = $this->ask($this->url, $data);
+
+        if (empty($result) || !$result) {
+            return '';
+        }
+
+        $response = json_decode($result, true);
+        if ($response['status'] !== 'OK') {
+            return '';
+        }
+
+        $content = $this->ask($response['link'], self::METHOD_GET);
+
+        return !empty($content) ? $content : '';
     }
 
     private function resolveLocale()
@@ -54,7 +74,7 @@ class Loader
     private function resolveIp()
     {
         //Check to see if the CF-Connecting-IP header exists.
-        if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])){
+        if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
             //If it does, assume that PHP app is behind Cloudflare.
             $ipAddress = $_SERVER["HTTP_CF_CONNECTING_IP"];
         } else {
@@ -120,4 +140,21 @@ class Loader
 
         return $return;
     }
+
+    /**
+     * @return bool
+     */
+    public function isDebug(): bool
+    {
+        return $this->debug;
+    }
+
+    /**
+     * @param bool $debug
+     */
+    public function setDebug(bool $debug): void
+    {
+        $this->debug = $debug;
+    }
+
 }
