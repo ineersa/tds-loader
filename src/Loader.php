@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Loader;
+namespace Ineersa\TDS;
 
 class Loader
 {
@@ -38,6 +38,7 @@ class Loader
             'utm_term' => $_REQUEST['utm_term'],
         ];
 
+        return $data;
     }
 
     private function resolveLocale()
