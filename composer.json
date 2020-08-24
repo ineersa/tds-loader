@@ -1,0 +1,22 @@
+{
+    "name": "ineersa/tds-loader",
+    "description": "TDS loader",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ineersa",
+            "email": "ineersa@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.1",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
