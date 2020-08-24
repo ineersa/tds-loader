@@ -12,8 +12,6 @@ class Loader
 
     private $debug = false;
 
-    private $advDebug = false; // Note that enabling advanced debug will include debugging information in the response possibly breaking up your code
-
     public $responseCode;
 
     private const METHOD_POST = 'POST';
@@ -52,6 +50,7 @@ class Loader
         }
 
         $response = json_decode($result, true);
+
         if ($response['status'] !== 'OK') {
             return '';
         }
@@ -101,13 +100,10 @@ class Loader
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Don't print the result
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->timeout);
         curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
-        curl_setopt($curl, CURLOPT_FAILONERROR, true);
+        curl_setopt($curl, CURLOPT_FAILONERROR, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0); // Don't verify SSL connection
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0); //         ""           ""
-        if ($this->advDebug) {
-            curl_setopt($curl, CURLOPT_HEADER, true); // Display headers
-            curl_setopt($curl, CURLOPT_VERBOSE, true); // Display communication with server
-        }
+
         if ($method == self::METHOD_POST) {
             curl_setopt($curl, CURLOPT_POST, true);
         }
@@ -117,22 +113,13 @@ class Loader
 
         try {
             $return = curl_exec($curl);
+            if ($this->debug) {
+                print "<pre>";
+                print_r($return);
+                print "</pre>";
+            }
             $this->responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            if ($this->debug || $this->advDebug) {
-                echo "<pre>";
-                print_r(curl_getinfo($curl));
-                echo "</pre>";
-                echo "<pre>";
-                print_r($data);
-                echo "</pre>";
-            }
         } catch (\Exception $ex) {
-            if ($this->debug || $this->advDebug) {
-                echo "<br>cURL error num: " . curl_errno($curl);
-                echo "<br>cURL error: " . curl_error($curl);
-            }
-            echo "Error on cURL";
-
             $return = null;
         }
 
