@@ -52,12 +52,19 @@ class Loader
         $response = json_decode($result, true);
 
         if ($response['status'] !== 'OK') {
-            return '';
+            return $response['default_html'];
         }
 
-        $content = $this->ask($response['link'], self::METHOD_GET);
-
-        return !empty($content) ? $content : '';
+        switch ($response['method']) {
+            case 'redirect':
+                header('Status: 301 Moved Permanently', false, 301);
+                header('Location: '.$response['link']);
+                return '';
+            case 'curl':
+            default:
+                $content = $this->ask($response['link'], self::METHOD_GET);
+                return !empty($content) ? $content : '';
+        }
     }
 
     private function resolveLocale()
