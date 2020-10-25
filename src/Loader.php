@@ -57,9 +57,8 @@ class Loader
 
         switch ($response['method']) {
             case 'redirect':
-                header('Status: 301 Moved Permanently', false, 301);
-                header('Location: '.$response['link']);
-                return '';
+                header('Location: '.$response['link'], true, 302);
+                exit(0);
             case 'curl':
             default:
                 $content = $this->ask($response['link'], self::METHOD_GET);
